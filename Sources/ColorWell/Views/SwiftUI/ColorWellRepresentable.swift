@@ -44,7 +44,6 @@ struct ColorWellRepresentable: NSViewRepresentable {
 
         colorWell.showsAlphaForcedState = supportsOpacity
         colorWell.changeHandlers.append { newValue in
-            print("change handler")
             self.$color.wrappedValue = Color(newValue.cgColor)
         }
         
