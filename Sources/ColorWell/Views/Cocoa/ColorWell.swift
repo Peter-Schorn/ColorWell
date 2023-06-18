@@ -272,10 +272,14 @@ public class ColorWell: _ColorWellBaseView {
     ///   - frameRect: The frame rectangle for the created color panel.
     ///   - color: The initial value of the color well's color.
     ///   - style: The style to use to display the color well.
-    public init(frame frameRect: NSRect, color: NSColor, style: Style) {
-        self.color = color
-        self.style = style
-        super.init(frame: frameRect)
+    public init(
+        frame frameRect: NSRect? = nil,
+        color: NSColor? = nil,
+        style: Style? = nil
+    ) {
+        self.color = color ?? Self.defaultColor
+        self.style = style ?? Self.defaultStyle
+        super.init(frame: frameRect ?? Self.defaultFrame)
         performSharedSetup()
     }
 
@@ -292,49 +296,18 @@ public class ColorWell: _ColorWellBaseView {
 
     // MARK: Convenience Initializers
 
-    /// Creates a color well with the specified frame and color.
-    ///
-    /// - Parameters:
-    ///   - frameRect: The frame rectangle for the created color panel.
-    ///   - color: The initial value of the color well's color.
-    public convenience init(frame frameRect: NSRect, color: NSColor) {
-        self.init(frame: frameRect, color: color, style: Self.defaultStyle)
-    }
-
-    /// Creates a color well with the specified frame.
-    ///
-    /// - Parameter frameRect: The frame rectangle for the created color panel.
-    public override convenience init(frame frameRect: NSRect) {
-        self.init(frame: frameRect, color: Self.defaultColor)
-    }
-
-    /// Creates a color well using a default frame, color, and style.
-    public convenience init() {
-        self.init(frame: Self.defaultFrame)
-    }
-
-    /// Creates a color well with the specified style.
-    ///
-    /// - Parameter style: The style to use to display the color well.
-    public convenience init(style: Style) {
-        self.init(frame: Self.defaultFrame, color: Self.defaultColor, style: style)
-    }
-
-    /// Creates a color well with the specified color.
-    ///
-    /// - Parameter color: The initial value of the color well's color.
-    public convenience init(color: NSColor) {
-        self.init(frame: Self.defaultFrame, color: color)
-    }
-
     /// Creates a color well with the specified Core Graphics color.
     ///
     /// - Parameter cgColor: The initial value of the color well's color.
-    public convenience init?(cgColor: CGColor) {
+    public convenience init?(
+        frame frameRect: NSRect? = nil,
+        cgColor: CGColor,
+        style: Style? = nil
+    ) {
         guard let color = NSColor(cgColor: cgColor) else {
             return nil
         }
-        self.init(color: color)
+        self.init(frame: frameRect, color: color, style: style)
     }
 
     // TODO: Replace this with an `init?(ciColor: CIColor)` signature.
@@ -348,11 +321,15 @@ public class ColorWell: _ColorWellBaseView {
     /// Creates a color well with the specified Core Image color.
     ///
     /// - Parameter ciColor: The initial value of the color well's color.
-    public convenience init?(coreImageColor ciColor: CIColor) {
+    public convenience init?(
+        frame frameRect: NSRect? = nil,
+        coreImageColor ciColor: CIColor,
+        style: Style? = nil
+    ) {
         guard let cgColor = CGColor(colorSpace: ciColor.colorSpace, components: ciColor.components) else {
             return nil
         }
-        self.init(cgColor: cgColor)
+        self.init(frame: frameRect, cgColor: cgColor, style: style)
     }
 
     #if canImport(SwiftUI)

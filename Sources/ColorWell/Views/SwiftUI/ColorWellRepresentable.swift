@@ -20,41 +20,47 @@ class BridgedColorWell: ColorWell {
         }
     }
 
-    convenience init(color: NSColor, style: Style) {
-        self.init(frame: Self.defaultFrame, color: color, style: style)
-    }
 }
 
 // MARK: - ColorWellRepresentable
 
 /// An `NSViewRepresentable` wrapper around a `ColorWell`.
-@available(macOS 10.15, *)
+@available(macOS 11, *)
 struct ColorWellRepresentable: NSViewRepresentable {
-    /// The configuration used to create the color well.
-    let configuration: ColorWellConfiguration
-
+    
+    @Binding var color: Color
+    @Binding var supportsOpacity: Bool
+    
+    init(color: Binding<Color>, supportsOpacity: Binding<Bool> = .constant(true)) {
+        self._color = color
+        self._supportsOpacity = supportsOpacity
+    }
+    
     /// Creates and returns this view's underlying color well.
     func makeNSView(context: Context) -> ColorWell {
-        guard let color = configuration.color else {
-            guard let style = context.environment.colorWellStyleConfiguration.style else {
-                return BridgedColorWell()
-            }
-            return BridgedColorWell(style: style)
+        
+        let style = context.environment.colorWellStyleConfiguration.style
+        let colorWell = BridgedColorWell(color: NSColor(color), style: style)
+
+        colorWell.showsAlphaForcedState = supportsOpacity
+        colorWell.changeHandlers.append { newValue in
+            self.$color.wrappedValue = Color(newValue.cgColor)
         }
-        guard let style = context.environment.colorWellStyleConfiguration.style else {
-            return BridgedColorWell(color: color)
-        }
-        return BridgedColorWell(color: color, style: style)
+        
+        return colorWell
+
     }
 
     /// Updates the color well's configuration to the most recent
     /// values stored in the environment.
     func updateNSView(_ colorWell: ColorWell, context: Context) {
         updateStyle(colorWell, context: context)
-        updateChangeHandlers(colorWell, context: context)
+        // updateChangeHandlers(colorWell, context: context)
         updateSwatchColors(colorWell, context: context)
         updateIsEnabled(colorWell, context: context)
-        configuration.updateShowsAlpha(colorWell)
+        // configuration.updateShowsAlpha(colorWell)
+        colorWell.color = NSColor(color)
+        colorWell.showsAlphaForcedState = supportsOpacity
     }
 
     /// Updates the color well's style to the most recent configuration
@@ -67,21 +73,21 @@ struct ColorWellRepresentable: NSViewRepresentable {
 
     /// Updates the color well's change handlers to the most recent
     /// value stored in the environment.
-    func updateChangeHandlers(_ colorWell: ColorWell, context: Context) {
-        // If an action was added to the configuration, it can only have
-        // happened on initialization, so it should come first.
-        var changeHandlers = Array(compacting: [configuration.action])
-
-        // @ViewBuilder blocks are evaluated from the outside in. This causes
-        // the change handlers that were added nearest to the color well in
-        // the view hierarchy to be added last in the environment. Reversing
-        // the stored handlers returns the correct order.
-        changeHandlers += context.environment.changeHandlers.reversed()
-
-        // Overwrite the current change handlers. DO NOT APPEND, or more and
-        // more duplicate actions will be added every time the view updates.
-        colorWell.changeHandlers = changeHandlers
-    }
+    // func updateChangeHandlers(_ colorWell: ColorWell, context: Context) {
+    //     // If an action was added to the configuration, it can only have
+    //     // happened on initialization, so it should come first.
+    //     var changeHandlers = Array(compacting: [configuration.action])
+    //
+    //     // @ViewBuilder blocks are evaluated from the outside in. This causes
+    //     // the change handlers that were added nearest to the color well in
+    //     // the view hierarchy to be added last in the environment. Reversing
+    //     // the stored handlers returns the correct order.
+    //     changeHandlers += context.environment.changeHandlers.reversed()
+    //
+    //     // Overwrite the current change handlers. DO NOT APPEND, or more and
+    //     // more duplicate actions will be added every time the view updates.
+    //     colorWell.changeHandlers = changeHandlers
+    // }
 
     /// Updates the color well's swatch colors to the most recent
     /// value stored in the environment.
