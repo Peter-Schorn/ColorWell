@@ -44,6 +44,7 @@ struct ColorWellRepresentable: NSViewRepresentable {
 
         colorWell.showsAlphaForcedState = supportsOpacity
         colorWell.changeHandlers.append { newValue in
+            print("change handler")
             self.$color.wrappedValue = Color(newValue.cgColor)
         }
         
@@ -59,8 +60,10 @@ struct ColorWellRepresentable: NSViewRepresentable {
         updateSwatchColors(colorWell, context: context)
         updateIsEnabled(colorWell, context: context)
         // configuration.updateShowsAlpha(colorWell)
-        colorWell.color = NSColor(color)
-        colorWell.showsAlphaForcedState = supportsOpacity
+        
+        // colorWell.color = NSColor(color)
+        // colorWell.showsAlphaForcedState = supportsOpacity
+        
     }
 
     /// Updates the color well's style to the most recent configuration
