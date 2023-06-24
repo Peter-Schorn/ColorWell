@@ -76,4 +76,18 @@ public extension ColorWellView where Label == Text {
     
 }
 
+@available(macOS 11, *)
+public extension ColorWellView where Label == EmptyView {
+    
+    init(
+        color: Binding<Color>,
+        supportsOpacity: Binding<Bool> = .constant(true)
+    ) {
+        self.label = nil
+        self._color = color
+        self._supportsOpacity = supportsOpacity
+    }
+    
+}
+
 #endif
